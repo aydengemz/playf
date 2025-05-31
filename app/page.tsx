@@ -124,7 +124,7 @@ export default function Home() {
 
             {/* Steps */}
             <div className="space-y-2 mb-6">
-              {steps.map((step, index) => (
+              {steps.map((step) => (
                 <div 
                   key={step.number}
                   className="group flex items-center gap-3 bg-gradient-to-r from-[#6B11D6]/10 to-[#A62CD6]/10 p-3 rounded-xl border border-[#6B11D6]/20 hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
@@ -171,7 +171,7 @@ export default function Home() {
               J
             </div>
             <div className="flex-1">
-              <p className="text-xs text-gray-700 font-medium">"Made $425 in my first week! So easy and fun."</p>
+              <p className="text-xs text-gray-700 font-medium">&ldquo;Made $425 in my first week! So easy and fun.&rdquo;</p>
               <p className="text-[10px] text-gray-500 mt-0.5">- Jessica M. ⭐⭐⭐⭐⭐</p>
             </div>
           </div>
