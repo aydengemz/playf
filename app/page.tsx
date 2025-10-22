@@ -9,7 +9,7 @@ export default function Home() {
 
   useEffect(() => {
     // Animate amount
-    const finalAmount = 750;
+    const finalAmount = 100;
     const duration = 2000;
     const steps = 60;
     const increment = finalAmount / steps;
@@ -57,7 +57,7 @@ export default function Home() {
     },
     {
       number: 2,
-      title: "Complete Fun Tasks", 
+      title: "Complete 3-5 Tasks (Important)", 
       subtitle: "Surveys, trials & more",
       icon: "🎯"
     },
@@ -117,7 +117,7 @@ export default function Home() {
                       </span>
                     ))}
                   </div>
-                  <span className="text-xs text-gray-600 font-medium">4.6/5.0 • 16.5k+ Reviews</span>
+                  <span className="text-xs text-gray-600 font-medium">4.8/5.0 • 16.5k+ Reviews</span>
                 </div>
               </div>
             </div>
@@ -148,7 +148,7 @@ export default function Home() {
             {/* CTA Button */}
             <button 
               className="w-full bg-gradient-to-r from-[#6B11D6] to-[#A62CD6] text-white py-4 rounded-xl font-bold text-base hover:from-[#5A0FB6] hover:to-[#8F26B6] transition-all duration-300 mb-4 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] transform group"
-              onClick={() => window.location.href = "https://getrewarrds.com/aff_c?offer_id=1337&aff_id=139418"}
+              onClick={() => window.location.href = "https://affrkr.com/?TTT=PqH%2bDyuRGCtn2ef4fI49JMYeOSl1JcQ4vQJDRoz7h5U%3d&s1="}
             >
               <span>Download & Start Earning</span>
               <span className="text-xl group-hover:translate-x-1 transition-transform duration-300">→</span>
