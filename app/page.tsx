@@ -1,190 +1,431 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Head from "next/head";
+import Script from "next/script";
 
 export default function Home() {
-  const [amount, setAmount] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes in seconds
+  // ----- state -----
+  const [isVisible, setIsVisible] = useState(false);
+  const [amount, setAmount] = useState(100); // final amount for counter
+  const [toasts, setToasts] = useState<
+    { id: number; icon: string; title: string; text: string }[]
+  >([]);
+  const toastId = useRef(0);
 
+  // ----- config -----
+  const DEST_URL = "https://affrkr.com/?TTT=PqH%2bDyuRGCtn2ef4fI49JMYeOSl1JcQ4vQJDRoz7h5U%3d&s1="; // your destination
+  const TIKTOK_PIXEL_ID = "D3OJ1VRC77UACP3VTQ0G";
+  const FACEBOOK_PIXEL_ID = "1620194525592088";
+
+  // Names + messages (from provided HTML)
+  const NAMES = useMemo(
+    () => [
+      "Ava R.",
+      "Ethan T.",
+      "Luna W.",
+      "Caleb R.",
+      "Aria K.",
+      "Julian P.",
+      "Piper S.",
+      "Gabriel L.",
+      "Sofia G.",
+      "Alexander T.",
+      "Mia M.",
+      "Logan D.",
+      "Isabella W.",
+      "Benjamin R.",
+      "Charlotte K.",
+      "Oliver P.",
+      "Abigail S.",
+      "Elijah L.",
+      "Emily G.",
+      "William T.",
+      "Harper M.",
+      "Lucas D.",
+      "Amelia W.",
+      "Mason R.",
+      "Evelyn K.",
+      "Liam P.",
+      "Hannah S.",
+      "Noah L.",
+      "Abigail G.",
+      "Ethan T.",
+      "Zoe M.",
+      "Jackson B.",
+      "Victoria L.",
+      "Daniel K.",
+      "Madison P.",
+      "Samuel R.",
+      "Grace H.",
+      "Henry W.",
+      "Scarlett F.",
+      "Sebastian M.",
+      "Chloe D.",
+      "Wyatt S.",
+      "Penelope R.",
+      "Owen L.",
+      "Layla K.",
+      "Nathan P.",
+      "Riley S.",
+      "Leo M.",
+      "Hazel G.",
+      "Isaac T.",
+    ],
+    []
+  );
+
+  const NOTIFICATIONS = useMemo(
+    () => [
+      { icon: "👥", title: "Active Viewers", text: "12 people are viewing this offer right now" },
+      { icon: "🎉", title: "Recent Claims", text: "3 people claimed their reward in the last 5 minutes" },
+      { icon: "📍", title: "Local Activity", text: "5 people in your city just claimed rewards" },
+      { icon: "🔥", title: "Trending Now", text: "This offer is trending in your area" },
+      { icon: "⭐", title: "Popular Offer", text: "Popular offer - 45 people claimed today" },
+      { icon: "🌍", title: "Nearby Activity", text: "Trending in your area - 8 people nearby just claimed" },
+      { icon: "🎯", title: "Almost There", text: "You're 2 steps away from claiming your reward" },
+      { icon: "⏳", title: "Limited Spots", text: "Only 3 spots left for today's rewards" },
+      { icon: "📊", title: "Reward Status", text: "Reward pool is 89% depleted" },
+      { icon: "⏰", title: "Time Sensitive", text: "Last chance to claim before cards run out" },
+    ],
+    []
+  );
+
+  // ----- mount -----
   useEffect(() => {
-    // Animate amount
-    const finalAmount = 100;
+    setIsVisible(true);
+
+    // amount counter: animate 0 -> amount
+    const start = 0;
+    const end = amount;
     const duration = 2000;
-    const steps = 60;
-    const increment = finalAmount / steps;
-    let currentStep = 0;
+    let startTs: number | null = null;
 
-    const amountInterval = setInterval(() => {
-      currentStep++;
-      const currentAmount = Math.min(finalAmount, currentStep * increment);
-      setAmount(currentAmount);
-
-      if (currentAmount >= finalAmount) {
-        clearInterval(amountInterval);
-      }
-    }, duration / steps);
-
-    // Timer countdown
-    const timerInterval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 0) {
-          clearInterval(timerInterval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => {
-      clearInterval(amountInterval);
-      clearInterval(timerInterval);
+    const step = (ts: number) => {
+      if (startTs === null) startTs = ts;
+      const p = Math.min((ts - startTs) / duration, 1);
+      const val = Math.floor(p * (end - start) + start);
+      setAmount(val);
+      if (p < 1) requestAnimationFrame(step);
     };
+    requestAnimationFrame(step);
+
+    // start toasts after 3s, then every 8-12s
+    const first = setTimeout(() => {
+      pushRandomToast();
+      const iv = setInterval(() => {
+        pushRandomToast();
+      }, 8000 + Math.random() * 4000);
+      return () => clearInterval(iv);
+    }, 3000);
+
+    return () => clearTimeout(first);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  // ----- helpers -----
+  const pushRandomToast = () => {
+    const id = ++toastId.current;
+    const isName = Math.random() > 0.5;
+
+    if (isName) {
+      const randomName = NAMES[Math.floor(Math.random() * NAMES.length)];
+      setToasts((t) => [
+        ...t,
+        { id, icon: "💵", title: "Recent Claim", text: `${randomName} claimed $100!` },
+      ]);
+    } else {
+      const pick = NOTIFICATIONS[Math.floor(Math.random() * NOTIFICATIONS.length)];
+      setToasts((t) => [...t, { id, ...pick }]);
+    }
+
+    // auto-remove after 5s
+    setTimeout(() => {
+      setToasts((t) => t.filter((x) => x.id !== id));
+    }, 5000);
   };
 
-  const steps = [
-    {
-      number: 1,
-      title: "Download Playful Rewards",
-      subtitle: "Get started in seconds",
-      icon: "📱"
-    },
-    {
-      number: 2,
-      title: "Complete 3-5 Tasks (Important)", 
-      subtitle: "Surveys, trials & more",
-      icon: "🎯"
-    },
-    {
-      number: 3,
-      title: "Get Your Rewards",
-      subtitle: "Earn up to $750!",
-      icon: "💰"
+  const handleCTA = async () => {
+    // Client-side TT tracking (if pixel present)
+    try {
+      // @ts-ignore
+      if (window.ttq && typeof window.ttq.track === "function") {
+        // @ts-ignore
+        window.ttq.track("AddToCart", {
+          content_type: "product",
+          content_id: "cash-rewards-750",
+          value: 0.5,
+          currency: "USD",
+        });
+        // @ts-ignore
+        window.ttq.track("Purchase", {
+          content_type: "product",
+          content_id: "cash-rewards-750",
+          value: 0.5,
+          currency: "USD",
+        });
+        // @ts-ignore
+        window.ttq.track("SubmitForm", {
+          content_type: "lead",
+          content_id: "cash-rewards-lead",
+          value: 0.5,
+          currency: "USD",
+        });
+      }
+    } catch {
+      /* noop */
     }
-  ];
+
+    // Preserve existing query params (utm, s1, ttclid, etc.)
+    const dest = new URL(DEST_URL);
+    if (typeof window !== "undefined" && window.location.search.length > 1) {
+      dest.search = window.location.search;
+    }
+
+    // small grace to flush pixels (keep brief)
+    setTimeout(() => {
+      window.location.href = dest.toString();
+    }, 300);
+  };
+
+  // spawn floating emoji (🦇 🎃 🕸️)
+  const ornaments = useMemo(() => {
+    const items = Array.from({ length: 10 }).map((_, i) => {
+      const pool = ["🦇", "🎃", "🕸️"];
+      const emoji = pool[Math.floor(Math.random() * pool.length)];
+      const left = Math.floor(Math.random() * 100); // vw
+      const dur = 6 + Math.random() * 8; // s
+      const size = 16 + Math.random() * 16; // px
+      return { id: i, emoji, left, dur, size };
+    });
+    return items;
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#6B11D6] via-[#8A1FD6] to-[#A62CD6] p-2 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-24 h-24 bg-gradient-to-r from-[#6B11D6]/20 to-[#A62CD6]/20 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-32 right-16 w-32 h-32 bg-gradient-to-r from-[#8A1FD6]/20 to-[#6B11D6]/20 rounded-full blur-xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/4 w-20 h-20 bg-gradient-to-r from-[#A62CD6]/20 to-[#8A1FD6]/20 rounded-full blur-xl animate-pulse delay-500"></div>
-      </div>
+    <>
+      <Head>
+        {/* Optional: client hints delegate (won’t break if ignored) */}
+        <title>Playful Rewards</title>
+      </Head>
 
-      <div className="max-w-md mx-auto relative">
-        {/* Main Card */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-white/50 relative overflow-hidden">
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#6B11D6]/5 to-[#A62CD6]/5 pointer-events-none"></div>
-          
-          <div className="relative z-10">
-            {/* Header */}
-            <div className="text-center mb-6">
-              {/* Logo */}
-              <div className="w-20 h-20 mx-auto mb-4 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-300">
+      {/* TikTok Pixel */}
+      <Script id="ttq-base" strategy="afterInteractive">
+        {`
+          !function (w, d, t) {
+            w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];
+            ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],
+            ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};
+            for(var i=0;i<ttq.methods.length;i++) ttq.setAndDefer(ttq,ttq.methods[i]);
+            ttq.load=function(e,n){
+              var r="https://analytics.tiktok.com/i18n/pixel/events.js";
+              ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};
+              n=document.createElement("script");n.type="text/javascript";n.async=!0;n.src=r+"?sdkid="+e+"&lib="+t;
+              e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e);
+            };
+            ttq.load('${TIKTOK_PIXEL_ID}'); ttq.page();
+          }(window, document, 'ttq');
+        `}
+      </Script>
+
+      {/* Facebook Pixel */}
+      <Script id="fbq-base" strategy="afterInteractive">
+        {`
+          !function(f,b,e,v,n,t,s){
+            if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;
+            s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)
+          }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '${FACEBOOK_PIXEL_ID}');
+          fbq('track', 'PageView');
+        `}
+      </Script>
+      <noscript>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          height="1"
+          width="1"
+          style={{ display: "none" }}
+          src={`https://www.facebook.com/tr?id=${FACEBOOK_PIXEL_ID}&ev=PageView&noscript=1`}
+          alt=""
+        />
+      </noscript>
+
+      {/* Background (soft radial Halloween palette) */}
+      <div className="min-h-screen relative overflow-x-hidden">
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(1200px 600px at 50% -200px, #fff7ec 0%, #ffe9d1 45%, #ffe0bf 80%, #ffd7ad 100%)",
+          }}
+        />
+
+        {/* Floating ornaments */}
+        {ornaments.map((o) => (
+          <div
+            key={o.id}
+            className="fixed top-[-40px] z-0 opacity-60 pointer-events-none animate-flyDown"
+            style={{
+              left: `${o.left}vw`,
+              animationDuration: `${o.dur}s`,
+              fontSize: `${o.size}px`,
+            }}
+          >
+            {o.emoji}
+          </div>
+        ))}
+
+        {/* Toasts */}
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[1000] w-[calc(100%-2rem)] max-w-xs space-y-3">
+          {toasts.map((t) => (
+            <div
+              key={t.id}
+              className="bg-white/95 backdrop-blur-md rounded-xl shadow-[0_8px_32px_rgba(255,106,0,0.15)] border border-[#ff6a0033] px-4 py-3 flex gap-3 animate-slideDown"
+            >
+              <div className="w-6 h-6 rounded-full bg-[#ff6a00] text-white flex items-center justify-center text-xs">
+                {t.icon}
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-sm">{t.title}</div>
+                <div className="text-[13px] text-slate-600">{t.text}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Page container */}
+        <div className="min-h-screen flex items-center justify-center p-5 relative z-10">
+          {/* Card */}
+          <div
+            className={`max-w-md w-full bg-white/95 rounded-3xl border border-[#ff6a0033] shadow-[0_10px_30px_rgba(255,106,0,0.1),0_1px_8px_rgba(255,106,0,0.18)] backdrop-blur-md p-4 transition-all duration-700 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            } animate-cardFloat`}
+          >
+            {/* Logo / header */}
+            <div className="text-center mb-2 pb-2 border-b border-[#ff6a001a] relative">
+              {/* Decorative dots */}
+              <span className="absolute -top-2 left-[calc(50%-80px)] w-[18px] h-[18px] rounded-full shadow-[0_0_12px_rgba(255,106,0,0.2),0_0_30px_rgba(255,106,0,0.1)]"
+                style={{ background: "radial-gradient(circle at 30% 30%, #ff9d4d 0%, #ff6a00 60%, #ff3d00 100%)" }}
+              />
+              <span className="absolute -top-2 right-[calc(50%-80px)] w-[18px] h-[18px] rounded-full shadow-[0_0_12px_rgba(255,106,0,0.2),0_0_30px_rgba(255,106,0,0.1)]"
+                style={{ background: "radial-gradient(circle at 30% 30%, #ff9d4d 0%, #ff6a00 60%, #ff3d00 100%)" }}
+              />
+
+              {/* App logo */}
+              <div className="mx-auto">
                 <Image
-                  src="/plaf.webp"
-                  alt="Playful Rewards Logo"
-                  width={80}
-                  height={80}
+                  src="/plafff.png"
+                  alt="a"
+                  width={150}
+                  height={150}
+                  className="rounded-md mx-auto drop-shadow-[0_4px_12px_rgba(255,106,0,0.3)]"
+                  style={{ filter: "hue-rotate(330deg) saturate(1.2)" }}
                   priority
-                  className="rounded-xl"
                 />
               </div>
-              
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-[#6B11D6] to-[#A62CD6] bg-clip-text text-transparent mb-3">
-                Playful Rewards
-              </h1>
-              
-              {/* Amount Display */}
-              <div className="bg-gradient-to-r from-[#6B11D6]/10 to-[#A62CD6]/10 rounded-xl p-3 mb-3 border border-[#6B11D6]/20 shadow-inner">
-                <p className="text-gray-600 text-sm mb-1 font-medium">Complete fun tasks to earn up to</p>
-                <div className="text-4xl font-bold bg-gradient-to-r from-[#6B11D6] to-[#A62CD6] bg-clip-text text-transparent mb-1 tracking-tight">
-                  ${amount.toFixed(2)}
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="flex text-amber-400 text-sm">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className="animate-pulse" style={{ animationDelay: `${i * 100}ms` }}>
-                        ⭐
-                      </span>
-                    ))}
-                  </div>
-                  <span className="text-xs text-gray-600 font-medium">4.8/5.0 • 16.5k+ Reviews</span>
-                </div>
+              <div className="text-2xl font-extrabold mt-2 text-[#2f3033] drop-shadow-[0_2px_10px_rgba(255,106,0,0.12)]">
+                Playful Rewards 🎃
+              </div>
+              <div className="mt-2">
+                <Image
+                  src="/verd.png"
+                  alt="Verified"
+                  width={120}
+                  height={120}
+                  className="mx-auto"
+                  style={{ filter: "hue-rotate(330deg) saturate(1.05)" }}
+                />
               </div>
             </div>
 
-            {/* Steps */}
-            <div className="space-y-2 mb-6">
-              {steps.map((step) => (
-                <div 
-                  key={step.number}
-                  className="group flex items-center gap-3 bg-gradient-to-r from-[#6B11D6]/10 to-[#A62CD6]/10 p-3 rounded-xl border border-[#6B11D6]/20 hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
-                >
-                  <div className="relative">
-                    <div className="bg-gradient-to-r from-[#6B11D6] to-[#A62CD6] text-white w-10 h-10 rounded-lg flex items-center justify-center font-bold text-base shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      {step.number}
-                    </div>
-                    <div className="absolute -top-1 -right-1 text-base">
-                      {step.icon}
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-gray-800 text-base">{step.title}</p>
-                    <p className="text-xs text-gray-600">{step.subtitle}</p>
-                  </div>
+            {/* Amount */}
+            <div className="text-center text-[2.2rem] font-bold text-[#ff6a00] drop-shadow-[0_3px_14px_rgba(255,106,0,0.2)] animate-amountPulse">
+              ${amount.toFixed(2)}
+            </div>
+            <div className="text-center text-[1.1rem] font-semibold text-[#5a5b60] -mt-1">
+              Sent to you • Spooky Special 👻
+            </div>
+
+            {/* Instructions */}
+            <div className="mt-4 p-4 rounded-2xl border border-[#ff6a001a] bg-[#ff6a000c]">
+              {[
+                "Click the Button Below 🍬",
+                "Enter Your Email & Info 🕯️",
+                "Complete at least 3-5 Deals 🕸️",
+                "Claim Reward & Repeat 🧙",
+              ].map((txt, i) => (
+                <div key={i} className="flex items-center justify-center gap-3 py-2 font-semibold text-[#2f3033]">
+                  <span className="w-6 h-6 rounded-full bg-[#ff6a00] text-white text-sm font-bold shadow-[0_2px_8px_rgba(255,106,0,0.35)] flex items-center justify-center">
+                    {i + 1}
+                  </span>
+                  <span className={i === 2 ? "underline decoration-[#ff6a00] decoration-2 underline-offset-2" : ""}>
+                    {txt}
+                  </span>
                 </div>
               ))}
             </div>
 
-            {/* CTA Button */}
-            <button 
-              className="w-full bg-gradient-to-r from-[#6B11D6] to-[#A62CD6] text-white py-4 rounded-xl font-bold text-base hover:from-[#5A0FB6] hover:to-[#8F26B6] transition-all duration-300 mb-4 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] transform group"
-              onClick={() => window.location.href = "https://affrkr.com/?TTT=PqH%2bDyuRGCtn2ef4fI49JMYeOSl1JcQ4vQJDRoz7h5U%3d&s1="}
-            >
-              <span>Download & Start Earning</span>
-              <span className="text-xl group-hover:translate-x-1 transition-transform duration-300">→</span>
-            </button>
-
-            {/* Disclaimer */}
-            <div className="bg-gray-50/80 rounded-lg p-3 border border-gray-200/50">
-              <p className="text-xs text-gray-500 text-center leading-relaxed">
-                This offer requires downloading the Playful Rewards app. Earnings vary based on task completion. 
-                Not affiliated with any payment apps. Terms and conditions apply.
-              </p>
+            {/* CTA */}
+            <div className="mt-4">
+              <button
+                onClick={handleCTA}
+                className="w-full bg-gradient-to-r from-[#ff6a00] to-[#ff3d00] text-white py-4 rounded-2xl font-extrabold text-[1.1rem] shadow-[0_10px_30px_rgba(255,106,0,0.3),0_5px_15px_rgba(255,106,0,0.2)] transition-transform hover:-translate-y-1"
+              >
+                Get Your $100 Treat →
+              </button>
+              <div className="mt-3">
+                <Image
+                  src="/trus2.png"
+                  alt="Trust Badge"
+                  width={800}
+                  height={200}
+                  className="w-full rounded-xl opacity-90 transition-opacity hover:opacity-100"
+                  style={{ filter: "hue-rotate(330deg) saturate(1.05)" }}
+                />
+              </div>
             </div>
-          </div>
-        </div>
-
-        {/* Floating testimonial */}
-        <div className="mt-4 bg-white/70 backdrop-blur-lg rounded-xl p-3 shadow-lg border border-white/50">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-[#6B11D6] to-[#A62CD6] rounded-full flex items-center justify-center text-white font-bold text-sm">
-              J
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-gray-700 font-medium">&ldquo;Made $425 in my first week! So easy and fun.&rdquo;</p>
-              <p className="text-[10px] text-gray-500 mt-0.5">- Jessica M. ⭐⭐⭐⭐⭐</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Fixed Timer at bottom */}
-        <div className="fixed bottom-0 left-0 right-0 p-2 bg-white/90 backdrop-blur-sm border-t border-white/50 z-50">
-          <div className="max-w-md mx-auto flex items-center justify-center gap-2">
-            <span className="text-red-600 text-sm font-medium">⏰ Offer ends in:</span>
-            <span className="font-bold text-red-700">{formatTime(timeLeft)}</span>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* keyframes */}
+      <style jsx global>{`
+        @keyframes cardFloat {
+          0%,100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-cardFloat {
+          animation: cardFloat 3s ease-in-out infinite;
+        }
+        @keyframes amountPulse {
+          0%,100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        .animate-amountPulse {
+          animation: amountPulse 2s infinite;
+        }
+        @keyframes flyDown {
+          0% { transform: translateY(-60px) translateX(0) rotate(0deg); opacity: 0; }
+          10% { opacity: 0.8; }
+          50% { transform: translateY(50vh) translateX(20px) rotate(10deg); }
+          100% { transform: translateY(110vh) translateX(-20px) rotate(-8deg); opacity: 0; }
+        }
+        .animate-flyDown {
+          animation-name: flyDown;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+        }
+        @keyframes slideDown {
+          from { transform: translate(-50%,-100%); opacity: 0; }
+          to { transform: translate(-50%,0); opacity: 1; }
+        }
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out;
+        }
+      `}</style>
+    </>
   );
 }
