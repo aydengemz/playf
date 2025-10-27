@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Head from "next/head";
-import Script from "next/script";
 
 export default function Home() {
   // ----- state -----
@@ -16,8 +15,6 @@ export default function Home() {
 
   // ----- config -----
   const DEST_URL = "https://affrkr.com/?TTT=PqH%2bDyuRGCtn2ef4fI49JMYeOSl1JcQ4vQJDRoz7h5U%3d&s1="; // your destination
-  const TIKTOK_PIXEL_ID = "D3OJ1VRC77UACP3VTQ0G";
-  const FACEBOOK_PIXEL_ID = "1620194525592088";
 
   // Names + messages (from provided HTML)
   const NAMES = useMemo(
@@ -147,43 +144,12 @@ export default function Home() {
   };
 
   const handleCTA = async () => {
-    // Client-side TT tracking (if pixel present)
-    try {
-      // @ts-ignore
-      if (window.ttq && typeof window.ttq.track === "function") {
-        // @ts-ignore
-        window.ttq.track("AddToCart", {
-          content_type: "product",
-          content_id: "cash-rewards-750",
-          value: 0.5,
-          currency: "USD",
-        });
-        // @ts-ignore
-        window.ttq.track("Purchase", {
-          content_type: "product",
-          content_id: "cash-rewards-750",
-          value: 0.5,
-          currency: "USD",
-        });
-        // @ts-ignore
-        window.ttq.track("SubmitForm", {
-          content_type: "lead",
-          content_id: "cash-rewards-lead",
-          value: 0.5,
-          currency: "USD",
-        });
-      }
-    } catch {
-      /* noop */
-    }
-
     // Preserve existing query params (utm, s1, ttclid, etc.)
     const dest = new URL(DEST_URL);
     if (typeof window !== "undefined" && window.location.search.length > 1) {
       dest.search = window.location.search;
     }
 
-    // small grace to flush pixels (keep brief)
     setTimeout(() => {
       window.location.href = dest.toString();
     }, 300);
@@ -208,50 +174,6 @@ export default function Home() {
         {/* Optional: client hints delegate (won’t break if ignored) */}
         <title>Playful Rewards</title>
       </Head>
-
-      {/* TikTok Pixel */}
-      <Script id="ttq-base" strategy="afterInteractive">
-        {`
-          !function (w, d, t) {
-            w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];
-            ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],
-            ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};
-            for(var i=0;i<ttq.methods.length;i++) ttq.setAndDefer(ttq,ttq.methods[i]);
-            ttq.load=function(e,n){
-              var r="https://analytics.tiktok.com/i18n/pixel/events.js";
-              ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};
-              n=document.createElement("script");n.type="text/javascript";n.async=!0;n.src=r+"?sdkid="+e+"&lib="+t;
-              e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e);
-            };
-            ttq.load('${TIKTOK_PIXEL_ID}'); ttq.page();
-          }(window, document, 'ttq');
-        `}
-      </Script>
-
-      {/* Facebook Pixel */}
-      <Script id="fbq-base" strategy="afterInteractive">
-        {`
-          !function(f,b,e,v,n,t,s){
-            if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;
-            s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)
-          }(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', '${FACEBOOK_PIXEL_ID}');
-          fbq('track', 'PageView');
-        `}
-      </Script>
-      <noscript>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          height="1"
-          width="1"
-          style={{ display: "none" }}
-          src={`https://www.facebook.com/tr?id=${FACEBOOK_PIXEL_ID}&ev=PageView&noscript=1`}
-          alt=""
-        />
-      </noscript>
 
       {/* Background (soft radial Halloween palette) */}
       <div className="min-h-screen relative overflow-x-hidden">
