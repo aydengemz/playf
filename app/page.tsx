@@ -80,13 +80,19 @@ export default function Home() {
   useEffect(() => {
     setIsVisible(true);
 
-    window.ttq?.track("ViewContent", {
-      content_type: "product",
-      content_id: "playful-lander",
-      currency: "USD",
-      value: 0,
-    });
-
+    const fireVC = () => {
+      if (window.ttq) {
+        window.ttq.track("ViewContent", {
+          content_type: "product",
+          content_id: "playful-lander",
+          currency: "USD",
+          value: 0,
+        });
+      } else {
+        setTimeout(fireVC, 50);
+      }
+    };
+    fireVC();
     // amount counter: animate 0 -> finalAmount
     const start = 0;
     const end = finalAmount;
@@ -182,10 +188,10 @@ export default function Home() {
     const destUrl = source
       ? `${BASE_DEST_URL}${encodeURIComponent(source)}`
       : BASE_DEST_URL;
-  
+
     setTimeout(() => {
       window.location.href = destUrl;
-    }, 300);
+    }, 400);
   }, [BASE_DEST_URL]);
   
   
