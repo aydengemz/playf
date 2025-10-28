@@ -3,73 +3,36 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import Head from "next/head";
+import Script from "next/script";
+
+declare global {
+  interface Window { ttq?: any }
+}
 
 export default function Home() {
   // ----- state -----
   const [isVisible, setIsVisible] = useState(false);
   const [amount, setAmount] = useState(0); // Start: 0 for animation
-  const [finalAmount] = useState(100); // Final amount for counter (won't change)
+  const [finalAmount] = useState(100);     // Final amount for counter (won't change)
   const [toasts, setToasts] = useState<
     { id: number; icon: string; title: string; text: string }[]
   >([]);
   const toastId = useRef(0);
 
   // ----- config -----
-  const BASE_DEST_URL = "https://affrkr.com/?TTT=PqH%2bDyuRGCtn2ef4fI49JMYeOSl1JcQ4vQJDRoz7h5U%3d&s1="; // your destination
+  const BASE_DEST_URL = "https://affrkr.com/?TTT=PqH%2bDyuRGCtn2ef4fI49JMYeOSl1JcQ4vQJDRoz7h5U%3d&s1=";
 
-  // Names + messages (from provided HTML)
+  // (Pixel) — your new TikTok Pixel ID
+  const TIKTOK_PIXEL_ID = "D40E2VRC77UD89P2K3TG";
+
+  // Names + messages
   const NAMES = useMemo(
     () => [
-      "Ava R.",
-      "Ethan T.",
-      "Luna W.",
-      "Caleb R.",
-      "Aria K.",
-      "Julian P.",
-      "Piper S.",
-      "Gabriel L.",
-      "Sofia G.",
-      "Alexander T.",
-      "Mia M.",
-      "Logan D.",
-      "Isabella W.",
-      "Benjamin R.",
-      "Charlotte K.",
-      "Oliver P.",
-      "Abigail S.",
-      "Elijah L.",
-      "Emily G.",
-      "William T.",
-      "Harper M.",
-      "Lucas D.",
-      "Amelia W.",
-      "Mason R.",
-      "Evelyn K.",
-      "Liam P.",
-      "Hannah S.",
-      "Noah L.",
-      "Abigail G.",
-      "Ethan T.",
-      "Zoe M.",
-      "Jackson B.",
-      "Victoria L.",
-      "Daniel K.",
-      "Madison P.",
-      "Samuel R.",
-      "Grace H.",
-      "Henry W.",
-      "Scarlett F.",
-      "Sebastian M.",
-      "Chloe D.",
-      "Wyatt S.",
-      "Penelope R.",
-      "Owen L.",
-      "Layla K.",
-      "Nathan P.",
-      "Riley S.",
-      "Leo M.",
-      "Hazel G.",
-      "Isaac T.",
+      "Ava R.","Ethan T.","Luna W.","Caleb R.","Aria K.","Julian P.","Piper S.","Gabriel L.","Sofia G.","Alexander T.",
+      "Mia M.","Logan D.","Isabella W.","Benjamin R.","Charlotte K.","Oliver P.","Abigail S.","Elijah L.","Emily G.","William T.",
+      "Harper M.","Lucas D.","Amelia W.","Mason R.","Evelyn K.","Liam P.","Hannah S.","Noah L.","Abigail G.","Ethan T.",
+      "Zoe M.","Jackson B.","Victoria L.","Daniel K.","Madison P.","Samuel R.","Grace H.","Henry W.","Scarlett F.","Sebastian M.",
+      "Chloe D.","Wyatt S.","Penelope R.","Owen L.","Layla K.","Nathan P.","Riley S.","Leo M.","Hazel G.","Isaac T.",
     ],
     []
   );
@@ -145,27 +108,51 @@ export default function Home() {
     }, 5000);
   };
 
-  // Add useCallback import above. useCallback needed for handleCTA. 
+  // Pixel helpers
+  const getTTCLID = () => {
+    try { return new URLSearchParams(window.location.search).get("ttclid") || ""; }
+    catch { return ""; }
+  };
+  const makeEventId = (prefix: string) =>
+    `${prefix}_${Math.random().toString(36).slice(2)}_${Date.now()}`;
+
+  // ----- CTA handler: fire AddToCart, then redirect -----
   const handleCTA = useCallback(() => {
     if (typeof window === "undefined") return;
 
-    // Get everything after the question mark in the current URL (i.e., the query string without '?')
+    // Fire ATC with params
+    try {
+      const eventId = makeEventId("atc");
+      window.ttq?.track(
+        "AddToCart",
+        {
+          content_type: "product",
+          content_id: "playful-app-100", // stable ID for this offer
+          value: 0.5,
+          currency: "USD",
+          ttclid: getTTCLID(),
+        },
+        { event_id: eventId }
+      );
+    } catch {}
+
+    // Preserve query params and redirect
     const rawSearch = window.location.search.startsWith("?")
       ? window.location.search.slice(1)
       : window.location.search;
 
-    // Only include & if rawSearch is not empty
     const destUrl =
       rawSearch && rawSearch.length > 0
         ? `${BASE_DEST_URL}${rawSearch}`
         : BASE_DEST_URL;
 
-    window.location.href = destUrl;
-  }, []);
+    // Small delay improves event delivery before nav
+    setTimeout(() => { window.location.href = destUrl; }, 300);
+  }, [BASE_DEST_URL]);
 
   // spawn floating emoji (🦇 🎃 🕸️)
   const ornaments = useMemo(() => {
-    const items = Array.from({ length: 10 }).map((_, i) => {
+    return Array.from({ length: 10 }).map((_, i) => {
       const pool = ["🦇", "🎃", "🕸️"];
       const emoji = pool[Math.floor(Math.random() * pool.length)];
       const left = Math.floor(Math.random() * 100); // vw
@@ -173,17 +160,35 @@ export default function Home() {
       const size = 16 + Math.random() * 16; // px
       return { id: i, emoji, left, dur, size };
     });
-    return items;
   }, []);
 
   return (
     <>
-      <Head>
-        {/* Optional: client hints delegate (won’t break if ignored) */}
-        <title>Playful Rewards</title>
-      </Head>
+      {/* TikTok Pixel loader — runs after hydration */}
+      <Script id="tiktok-pixel" strategy="afterInteractive">
+        {`
+!function (w, d, t) {
+  w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];
+  ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"];
+  ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};
+  for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);
+  ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};
+  ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js";
+    ttq._i=ttq._i||{},ttq._i[e]=[];
+    ttq._t=ttq._t||{},ttq._t[e]=+new Date;
+    ttq._o=ttq._o||{},ttq._o[e]=n||{};
+    n=d.createElement("script"); n.type="text/javascript"; n.async=!0; n.src=r+"?sdkid="+e+"&lib="+t;
+    var s=d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(n,s)
+  };
+  ttq.load('${TIKTOK_PIXEL_ID}');
+  ttq.page();
+}(window, document, 'ttq');
+        `}
+      </Script>
 
-      {/* Background (soft radial Halloween palette) */}
+      <Head><title>Playful Rewards</title></Head>
+
+      {/* Background */}
       <div className="min-h-screen relative overflow-x-hidden">
         <div
           className="absolute inset-0 -z-10"
@@ -198,11 +203,7 @@ export default function Home() {
           <div
             key={o.id}
             className="fixed top-[-40px] z-0 opacity-60 pointer-events-none animate-flyDown"
-            style={{
-              left: `${o.left}vw`,
-              animationDuration: `${o.dur}s`,
-              fontSize: `${o.size}px`,
-            }}
+            style={{ left: `${o.left}vw`, animationDuration: `${o.dur}s`, fontSize: `${o.size}px` }}
           >
             {o.emoji}
           </div>
@@ -236,15 +237,11 @@ export default function Home() {
           >
             {/* Logo / header */}
             <div className="text-center mb-2 pb-2 border-b border-[#ff6a001a] relative">
-              {/* Decorative dots */}
               <span className="absolute -top-2 left-[calc(50%-80px)] w-[18px] h-[18px] rounded-full shadow-[0_0_12px_rgba(255,106,0,0.2),0_0_30px_rgba(255,106,0,0.1)]"
-                style={{ background: "radial-gradient(circle at 30% 30%, #ff9d4d 0%, #ff6a00 60%, #ff3d00 100%)" }}
-              />
+                style={{ background: "radial-gradient(circle at 30% 30%, #ff9d4d 0%, #ff6a00 60%, #ff3d00 100%)" }} />
               <span className="absolute -top-2 right-[calc(50%-80px)] w-[18px] h-[18px] rounded-full shadow-[0_0_12px_rgba(255,106,0,0.2),0_0_30px_rgba(255,106,0,0.1)]"
-                style={{ background: "radial-gradient(circle at 30% 30%, #ff9d4d 0%, #ff6a00 60%, #ff3d00 100%)" }}
-              />
+                style={{ background: "radial-gradient(circle at 30% 30%, #ff9d4d 0%, #ff6a00 60%, #ff3d00 100%)" }} />
 
-              {/* App logo */}
               <div className="mx-auto">
                 <Image
                   src="/plafff.png"
@@ -323,38 +320,19 @@ export default function Home() {
 
       {/* keyframes */}
       <style jsx global>{`
-        @keyframes cardFloat {
-          0%,100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        .animate-cardFloat {
-          animation: cardFloat 3s ease-in-out infinite;
-        }
-        @keyframes amountPulse {
-          0%,100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-        .animate-amountPulse {
-          animation: amountPulse 2s infinite;
-        }
+        @keyframes cardFloat { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        .animate-cardFloat { animation: cardFloat 3s ease-in-out infinite; }
+        @keyframes amountPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .animate-amountPulse { animation: amountPulse 2s infinite; }
         @keyframes flyDown {
           0% { transform: translateY(-60px) translateX(0) rotate(0deg); opacity: 0; }
           10% { opacity: 0.8; }
           50% { transform: translateY(50vh) translateX(20px) rotate(10deg); }
           100% { transform: translateY(110vh) translateX(-20px) rotate(-8deg); opacity: 0; }
         }
-        .animate-flyDown {
-          animation-name: flyDown;
-          animation-timing-function: linear;
-          animation-iteration-count: infinite;
-        }
-        @keyframes slideDown {
-          from { transform: translate(-50%,-100%); opacity: 0; }
-          to { transform: translate(-50%,0); opacity: 1; }
-        }
-        .animate-slideDown {
-          animation: slideDown 0.3s ease-out;
-        }
+        .animate-flyDown { animation-name: flyDown; animation-timing-function: linear; animation-iteration-count: infinite; }
+        @keyframes slideDown { from { transform: translate(-50%,-100%); opacity: 0; } to { transform: translate(-50%,0); opacity: 1; } }
+        .animate-slideDown { animation: slideDown 0.3s ease-out; }
       `}</style>
     </>
   );
