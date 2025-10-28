@@ -80,6 +80,13 @@ export default function Home() {
   useEffect(() => {
     setIsVisible(true);
 
+    window.ttq?.track("ViewContent", {
+      content_type: "product",
+      content_id: "playful-lander",
+      currency: "USD",
+      value: 0,
+    });
+
     // amount counter: animate 0 -> finalAmount
     const start = 0;
     const end = finalAmount;
@@ -142,36 +149,46 @@ export default function Home() {
   // ----- CTA handler: fire AddToCart, then redirect -----
   const handleCTA = useCallback(() => {
     if (typeof window === "undefined") return;
-
-    // Fire ATC with params
+  
+    // Fire ATC event
     try {
       const eventId = makeEventId("atc");
       window.ttq?.track(
         "AddToCart",
         {
           content_type: "product",
-          content_id: "playful-app-100", // stable ID for this offer
+          content_id: "playful-app-100",
           value: 0.5,
           currency: "USD",
-          ttclid: getTTCLID(),
         },
         { event_id: eventId }
       );
     } catch {}
-
-    // Preserve query params and redirect
-    const rawSearch = window.location.search.startsWith("?")
-      ? window.location.search.slice(1)
-      : window.location.search;
-
-    const destUrl =
-      rawSearch && rawSearch.length > 0
-        ? `${BASE_DEST_URL}${rawSearch}`
-        : BASE_DEST_URL;
-
-    // Small delay improves event delivery before nav
-    setTimeout(() => { window.location.href = destUrl; }, 300);
+  
+    // Extract source from "?testsource&ttclid=..."
+    const params = new URLSearchParams(window.location.search);
+    const keys = [...params.keys()];
+    let source = "";
+  
+    if (keys.length > 0) {
+      const firstKey = keys[0];
+      if (firstKey.toLowerCase() !== "ttclid") {
+        source = firstKey;
+      } else if (keys.length > 1) {
+        source = keys[1];
+      }
+    }
+  
+    const destUrl = source
+      ? `${BASE_DEST_URL}${encodeURIComponent(source)}`
+      : BASE_DEST_URL;
+  
+    setTimeout(() => {
+      window.location.href = destUrl;
+    }, 300);
   }, [BASE_DEST_URL]);
+  
+  
 
   // spawn floating emoji (🦇 🎃 🕸️)
   const ornaments = useMemo(() => {
