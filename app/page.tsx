@@ -6,7 +6,30 @@ import Head from "next/head";
 import Script from "next/script";
 
 declare global {
-  interface Window { ttq?: any }
+  type TTQMethod = (...args: unknown[]) => void;
+  interface TTQ {
+    track: (
+      eventName: string,
+      params?: Record<string, unknown>,
+      options?: { event_id?: string }
+    ) => void;
+    page: TTQMethod;
+    identify?: TTQMethod;
+    instances?: TTQMethod;
+    debug?: TTQMethod;
+    on?: TTQMethod;
+    off?: TTQMethod;
+    once?: TTQMethod;
+    ready?: TTQMethod;
+    alias?: TTQMethod;
+    group?: TTQMethod;
+    enableCookie?: TTQMethod;
+    disableCookie?: TTQMethod;
+    holdConsent?: TTQMethod;
+    revokeConsent?: TTQMethod;
+    grantConsent?: TTQMethod;
+  }
+  interface Window { ttq?: TTQ }
 }
 
 export default function Home() {
