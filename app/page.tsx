@@ -160,7 +160,6 @@ export default function Home() {
         ? `${BASE_DEST_URL}${rawSearch}`
         : BASE_DEST_URL;
 
-    alert(destUrl);
     window.location.href = destUrl;
   }, []);
 
