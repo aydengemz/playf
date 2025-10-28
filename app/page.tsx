@@ -1,20 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import Head from "next/head";
 
 export default function Home() {
   // ----- state -----
   const [isVisible, setIsVisible] = useState(false);
-  const [amount, setAmount] = useState(100); // final amount for counter
+  const [amount, setAmount] = useState(0); // Start: 0 for animation
+  const [finalAmount] = useState(100); // Final amount for counter (won't change)
   const [toasts, setToasts] = useState<
     { id: number; icon: string; title: string; text: string }[]
   >([]);
   const toastId = useRef(0);
 
   // ----- config -----
-  const DEST_URL = "https://affrkr.com/?TTT=PqH%2bDyuRGCtn2ef4fI49JMYeOSl1JcQ4vQJDRoz7h5U%3d&s1="; // your destination
+  const BASE_DEST_URL = "https://affrkr.com/?TTT=PqH%2bDyuRGCtn2ef4fI49JMYeOSl1JcQ4vQJDRoz7h5U%3d&s1="; // your destination
 
   // Names + messages (from provided HTML)
   const NAMES = useMemo(
@@ -93,9 +94,9 @@ export default function Home() {
   useEffect(() => {
     setIsVisible(true);
 
-    // amount counter: animate 0 -> amount
+    // amount counter: animate 0 -> finalAmount
     const start = 0;
-    const end = amount;
+    const end = finalAmount;
     const duration = 2000;
     let startTs: number | null = null;
 
@@ -114,12 +115,13 @@ export default function Home() {
       const iv = setInterval(() => {
         pushRandomToast();
       }, 8000 + Math.random() * 4000);
+      // Clean up interval
       return () => clearInterval(iv);
     }, 3000);
 
     return () => clearTimeout(first);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [finalAmount]);
 
   // ----- helpers -----
   const pushRandomToast = () => {
@@ -143,17 +145,24 @@ export default function Home() {
     }, 5000);
   };
 
-  const handleCTA = async () => {
-    // Preserve existing query params (utm, s1, ttclid, etc.)
-    const dest = new URL(DEST_URL);
-    if (typeof window !== "undefined" && window.location.search.length > 1) {
-      dest.search = window.location.search;
-    }
+  // Add useCallback import above. useCallback needed for handleCTA. 
+  const handleCTA = useCallback(() => {
+    if (typeof window === "undefined") return;
 
-    setTimeout(() => {
-      window.location.href = dest.toString();
-    }, 300);
-  };
+    // Get everything after the question mark in the current URL (i.e., the query string without '?')
+    const rawSearch = window.location.search.startsWith("?")
+      ? window.location.search.slice(1)
+      : window.location.search;
+
+    // Only include & if rawSearch is not empty
+    const destUrl =
+      rawSearch && rawSearch.length > 0
+        ? `${BASE_DEST_URL}${rawSearch}`
+        : BASE_DEST_URL;
+
+    alert(destUrl);
+    window.location.href = destUrl;
+  }, []);
 
   // spawn floating emoji (🦇 🎃 🕸️)
   const ornaments = useMemo(() => {
