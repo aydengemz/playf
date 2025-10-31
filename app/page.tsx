@@ -144,11 +144,11 @@ export default function Home() {
     }, 5000);
   };
 
-  // Pixel helpers
-  const getTTCLID = () => {
-    try { return new URLSearchParams(window.location.search).get("ttclid") || ""; }
-    catch { return ""; }
-  };
+  // // Pixel helpers
+  // const getTTCLID = () => {
+  //   try { return new URLSearchParams(window.location.search).get("ttclid") || ""; }
+  //   catch { return ""; }
+  // };
   const makeEventId = (prefix: string) =>
     `${prefix}_${Math.random().toString(36).slice(2)}_${Date.now()}`;
 
