@@ -189,8 +189,6 @@ export default function Home() {
       ? `${BASE_DEST_URL}${encodeURIComponent(source)}`
       : BASE_DEST_URL;
 
-    alert(destUrl);
-
     setTimeout(() => {
       window.location.href = destUrl;
     }, 400);
