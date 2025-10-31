@@ -43,7 +43,7 @@ export default function Home() {
   const toastId = useRef(0);
 
   // ----- config -----
-  const BASE_DEST_URL = "https://rwrdtrk.com/aff_c?offer_id=2691&aff_id=11848&source=";
+  const BASE_DEST_URL = "https://affrkr.com/?eqi=qDiIvIZ0FPd5k3ZBwkcZ6CUT4WGB2ZQ%2fvQJDRoz7h5U%3d&s1=";
 
   // (Pixel) — your new TikTok Pixel ID
   const TIKTOK_PIXEL_ID = "D40E2VRC77UD89P2K3TG";
