@@ -46,7 +46,7 @@ export default function Home() {
   const BASE_DEST_URL = "https://affrkr.com/?TTT=PqH%2bDyuRGCtn2ef4fI49JMYeOSl1JcQ4vQJDRoz7h5U%3d&s1=";
 
   // (Pixel) — your new TikTok Pixel ID
-  const TIKTOK_PIXEL_ID = "D43SILJC77UCH1AEAOK0";
+  const TIKTOK_PIXEL_ID = "D43SLAJC77UER98133U0";
 
   // Names + messages
   const NAMES = useMemo(
