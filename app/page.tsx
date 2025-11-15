@@ -196,11 +196,6 @@ export default function Home() {
   
   
 
-  // REMOVE: Floating Halloween Emoji
-  // Replace with celebration confetti icons 🥳 🎊 🎈 🎉 or similar, or just remove entirely
-  // We'll just remove floating ornaments for simplicity.
-  const ornaments: never[] = [];
-
   return (
     <>
       {/* TikTok Pixel loader — runs after hydration */}
@@ -237,7 +232,7 @@ export default function Home() {
           }}
         />
 
-        {/* Ornaments removed */}
+
 
         {/* Toasts */}
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[1000] w-[calc(100%-2rem)] max-w-xs space-y-3">
