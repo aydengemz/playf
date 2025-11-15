@@ -156,7 +156,7 @@ export default function Home() {
   const handleCTA = useCallback(() => {
     if (typeof window === "undefined") return;
   
-    // Fire ATC event
+    // ----- AddToCart -----
     try {
       const eventId = makeEventId("atc");
       window.ttq?.track(
@@ -171,7 +171,22 @@ export default function Home() {
       );
     } catch {}
   
-    // Extract source from "?testsource&ttclid=..."
+    // ----- SubmitForm (NEW) -----
+    try {
+      const submitId = makeEventId("submit");
+      window.ttq?.track(
+        "SubmitForm",
+        {
+          content_type: "lead",
+          content_id: "playful-app-100",
+          value: 0.5,
+          currency: "USD",
+        },
+        { event_id: submitId }
+      );
+    } catch {}
+  
+    // ----- Source extract -----
     const params = new URLSearchParams(window.location.search);
     const keys = [...params.keys()];
     let source = "";
@@ -188,11 +203,12 @@ export default function Home() {
     const destUrl = source
       ? `${BASE_DEST_URL}${encodeURIComponent(source)}`
       : BASE_DEST_URL;
-
+  
     setTimeout(() => {
       window.location.href = destUrl;
     }, 400);
   }, [BASE_DEST_URL]);
+  
   
   
 
