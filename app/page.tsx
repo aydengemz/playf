@@ -444,7 +444,7 @@ export default function Home() {
             <div className="mt-4 p-4 rounded-2xl border border-[#ff6a001a] bg-[#ff6a000c]">
               {[
                 "Click the Button Below",
-                "Enter Your Email & Info",
+                "Download the Playful App",
                 "Complete at least 3-5 Deals",
                 "Claim Reward & Repeat",
               ].map((txt, i) => (
