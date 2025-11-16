@@ -29,49 +29,137 @@ declare global {
     revokeConsent?: TTQMethod;
     grantConsent?: TTQMethod;
   }
-  interface Window { ttq?: TTQ }
+  interface Window {
+    ttq?: TTQ;
+  }
 }
 
 export default function Home() {
   // ----- state -----
   const [isVisible, setIsVisible] = useState(false);
   const [amount, setAmount] = useState(0); // Start: 0 for animation
-  const [finalAmount] = useState(100);     // Final amount for counter (won't change)
+  const [finalAmount] = useState(100); // Final amount for counter (won't change)
   const [toasts, setToasts] = useState<
     { id: number; icon: string; title: string; text: string }[]
   >([]);
   const toastId = useRef(0);
 
   // ----- config -----
-  const BASE_DEST_URL = "https://www.ch6rrl8trk.com/cmp/W3WD1/9P848/?sub1=";
+  const BASE_DEST_URL =
+    "https://uplevelrewarded.com/aff_c?offer_id=2691&aff_id=11848&source=";
 
-  // (Pixel) — your new TikTok Pixel ID
+  // TikTok Pixel ID
   const TIKTOK_PIXEL_ID = "D40E2VRC77UD89P2K3TG";
 
   // Names + messages
   const NAMES = useMemo(
     () => [
-      "Ava R.","Ethan T.","Luna W.","Caleb R.","Aria K.","Julian P.","Piper S.","Gabriel L.","Sofia G.","Alexander T.",
-      "Mia M.","Logan D.","Isabella W.","Benjamin R.","Charlotte K.","Oliver P.","Abigail S.","Elijah L.","Emily G.","William T.",
-      "Harper M.","Lucas D.","Amelia W.","Mason R.","Evelyn K.","Liam P.","Hannah S.","Noah L.","Abigail G.","Ethan T.",
-      "Zoe M.","Jackson B.","Victoria L.","Daniel K.","Madison P.","Samuel R.","Grace H.","Henry W.","Scarlett F.","Sebastian M.",
-      "Chloe D.","Wyatt S.","Penelope R.","Owen L.","Layla K.","Nathan P.","Riley S.","Leo M.","Hazel G.","Isaac T.",
+      "Ava R.",
+      "Ethan T.",
+      "Luna W.",
+      "Caleb R.",
+      "Aria K.",
+      "Julian P.",
+      "Piper S.",
+      "Gabriel L.",
+      "Sofia G.",
+      "Alexander T.",
+      "Mia M.",
+      "Logan D.",
+      "Isabella W.",
+      "Benjamin R.",
+      "Charlotte K.",
+      "Oliver P.",
+      "Abigail S.",
+      "Elijah L.",
+      "Emily G.",
+      "William T.",
+      "Harper M.",
+      "Lucas D.",
+      "Amelia W.",
+      "Mason R.",
+      "Evelyn K.",
+      "Liam P.",
+      "Hannah S.",
+      "Noah L.",
+      "Abigail G.",
+      "Ethan T.",
+      "Zoe M.",
+      "Jackson B.",
+      "Victoria L.",
+      "Daniel K.",
+      "Madison P.",
+      "Samuel R.",
+      "Grace H.",
+      "Henry W.",
+      "Scarlett F.",
+      "Sebastian M.",
+      "Chloe D.",
+      "Wyatt S.",
+      "Penelope R.",
+      "Owen L.",
+      "Layla K.",
+      "Nathan P.",
+      "Riley S.",
+      "Leo M.",
+      "Hazel G.",
+      "Isaac T.",
     ],
     []
   );
 
   const NOTIFICATIONS = useMemo(
     () => [
-      { icon: "👥", title: "Active Viewers", text: "12 people are viewing this offer right now" },
-      { icon: "🎉", title: "Recent Claims", text: "3 people claimed their reward in the last 5 minutes" },
-      { icon: "📍", title: "Local Activity", text: "5 people in your city just claimed rewards" },
-      { icon: "🔥", title: "Trending Now", text: "This offer is trending in your area" },
-      { icon: "⭐", title: "Popular Offer", text: "Popular offer - 45 people claimed today" },
-      { icon: "🌍", title: "Nearby Activity", text: "Trending in your area - 8 people nearby just claimed" },
-      { icon: "🎯", title: "Almost There", text: "You're 2 steps away from claiming your reward" },
-      { icon: "⏳", title: "Limited Spots", text: "Only 3 spots left for today's rewards" },
-      { icon: "📊", title: "Reward Status", text: "Reward pool is 89% depleted" },
-      { icon: "⏰", title: "Time Sensitive", text: "Last chance to claim before cards run out" },
+      {
+        icon: "👥",
+        title: "Active Viewers",
+        text: "12 people are viewing this offer right now",
+      },
+      {
+        icon: "🎉",
+        title: "Recent Claims",
+        text: "3 people claimed their reward in the last 5 minutes",
+      },
+      {
+        icon: "📍",
+        title: "Local Activity",
+        text: "5 people in your city just claimed rewards",
+      },
+      {
+        icon: "🔥",
+        title: "Trending Now",
+        text: "This offer is trending in your area",
+      },
+      {
+        icon: "⭐",
+        title: "Popular Offer",
+        text: "Popular offer - 45 people claimed today",
+      },
+      {
+        icon: "🌍",
+        title: "Nearby Activity",
+        text: "Trending in your area - 8 people nearby just claimed",
+      },
+      {
+        icon: "🎯",
+        title: "Almost There",
+        text: "You're 2 steps away from claiming your reward",
+      },
+      {
+        icon: "⏳",
+        title: "Limited Spots",
+        text: "Only 3 spots left for today's rewards",
+      },
+      {
+        icon: "📊",
+        title: "Reward Status",
+        text: "Reward pool is 89% depleted",
+      },
+      {
+        icon: "⏰",
+        title: "Time Sensitive",
+        text: "Last chance to claim before cards run out",
+      },
     ],
     []
   );
@@ -80,7 +168,9 @@ export default function Home() {
   useEffect(() => {
     setIsVisible(true);
 
+    // ViewContent after pixel is ready
     const fireVC = () => {
+      if (typeof window === "undefined") return;
       if (window.ttq) {
         window.ttq.track("ViewContent", {
           content_type: "product",
@@ -93,7 +183,8 @@ export default function Home() {
       }
     };
     fireVC();
-    // amount counter: animate 0 -> finalAmount
+
+    // Amount counter: animate 0 -> finalAmount
     const start = 0;
     const end = finalAmount;
     const duration = 2000;
@@ -108,17 +199,20 @@ export default function Home() {
     };
     requestAnimationFrame(step);
 
-    // start toasts after 3s, then every 8-12s
-    const first = setTimeout(() => {
+    // Start toasts after 3s, then every 8–12s
+    const firstTimeout = setTimeout(() => {
       pushRandomToast();
-      const iv = setInterval(() => {
+      const intervalId = setInterval(() => {
         pushRandomToast();
       }, 8000 + Math.random() * 4000);
-      // Clean up interval
-      return () => clearInterval(iv);
+
+      // cleanup interval when unmount
+      return () => clearInterval(intervalId);
     }, 3000);
 
-    return () => clearTimeout(first);
+    return () => {
+      clearTimeout(firstTimeout);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finalAmount]);
 
@@ -134,7 +228,8 @@ export default function Home() {
         { id, icon: "💵", title: "Recent Claim", text: `${randomName} claimed $100!` },
       ]);
     } else {
-      const pick = NOTIFICATIONS[Math.floor(Math.random() * NOTIFICATIONS.length)];
+      const pick =
+        NOTIFICATIONS[Math.floor(Math.random() * NOTIFICATIONS.length)];
       setToasts((t) => [...t, { id, ...pick }]);
     }
 
@@ -144,19 +239,14 @@ export default function Home() {
     }, 5000);
   };
 
-  // // Pixel helpers
-  // const getTTCLID = () => {
-  //   try { return new URLSearchParams(window.location.search).get("ttclid") || ""; }
-  //   catch { return ""; }
-  // };
   const makeEventId = (prefix: string) =>
     `${prefix}_${Math.random().toString(36).slice(2)}_${Date.now()}`;
 
-  // ----- CTA handler: fire AddToCart, then redirect -----
+  // ----- CTA handler: pure TikTok pixel, no MaxConv -----
   const handleCTA = useCallback(() => {
     if (typeof window === "undefined") return;
-  
-    // ----- AddToCart -----
+
+    // AddToCart
     try {
       const eventId = makeEventId("atc");
       window.ttq?.track(
@@ -169,9 +259,11 @@ export default function Home() {
         },
         { event_id: eventId }
       );
-    } catch {}
-  
-    // ----- SubmitForm (NEW) -----
+    } catch {
+      // silently ignore
+    }
+
+    // SubmitForm
     try {
       const submitId = makeEventId("submit");
       window.ttq?.track(
@@ -184,13 +276,32 @@ export default function Home() {
         },
         { event_id: submitId }
       );
-    } catch {}
-  
-    // ----- Source extract -----
+    } catch {
+      // silently ignore
+    }
+
+    // Optional: front-loaded Purchase
+    try {
+      const purchaseId = makeEventId("purchase");
+      window.ttq?.track(
+        "Purchase",
+        {
+          content_type: "product",
+          content_id: "playful-app-100",
+          value: 0.5,
+          currency: "USD",
+        },
+        { event_id: purchaseId }
+      );
+    } catch {
+      // silently ignore
+    }
+
+    // Source extract from query params
     const params = new URLSearchParams(window.location.search);
     const keys = [...params.keys()];
     let source = "";
-  
+
     if (keys.length > 0) {
       const firstKey = keys[0];
       if (firstKey.toLowerCase() !== "ttclid") {
@@ -199,22 +310,20 @@ export default function Home() {
         source = keys[1];
       }
     }
-  
+
     const destUrl = source
       ? `${BASE_DEST_URL}${encodeURIComponent(source)}`
       : BASE_DEST_URL;
-  
+
+    // Small delay to allow pixel to fire
     setTimeout(() => {
       window.location.href = destUrl;
     }, 400);
   }, [BASE_DEST_URL]);
-  
-  
-  
 
   return (
     <>
-      {/* TikTok Pixel loader — runs after hydration */}
+      {/* TikTok Pixel loader — no MaxConv */}
       <Script id="tiktok-pixel" strategy="afterInteractive">
         {`
 !function (w, d, t) {
@@ -223,12 +332,16 @@ export default function Home() {
   ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};
   for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);
   ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};
-  ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js";
+  ttq.load=function(e,n){
+    var r="https://analytics.tiktok.com/i18n/pixel/events.js";
     ttq._i=ttq._i||{},ttq._i[e]=[];
     ttq._t=ttq._t||{},ttq._t[e]=+new Date;
     ttq._o=ttq._o||{},ttq._o[e]=n||{};
-    n=d.createElement("script"); n.type="text/javascript"; n.async=!0; n.src=r+"?sdkid="+e+"&lib="+t;
-    var s=d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(n,s)
+    n=d.createElement("script");
+    n.type="text/javascript"; n.async=!0;
+    n.src=r+"?sdkid="+e+"&lib="+t;
+    var s=d.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(n,s);
   };
   ttq.load('${TIKTOK_PIXEL_ID}');
   ttq.page();
@@ -236,7 +349,9 @@ export default function Home() {
         `}
       </Script>
 
-      <Head><title>Playful Rewards</title></Head>
+      <Head>
+        <title>Playful Rewards</title>
+      </Head>
 
       {/* Background */}
       <div className="min-h-screen relative overflow-x-hidden">
@@ -247,8 +362,6 @@ export default function Home() {
               "radial-gradient(1200px 600px at 50% -200px, #fff7ec 0%, #ffe9d1 45%, #ffe0bf 80%, #ffd7ad 100%)",
           }}
         />
-
-
 
         {/* Toasts */}
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[1000] w-[calc(100%-2rem)] max-w-xs space-y-3">
@@ -278,15 +391,25 @@ export default function Home() {
           >
             {/* Logo / header */}
             <div className="text-center mb-2 pb-2 border-b border-[#ff6a001a] relative">
-              <span className="absolute -top-2 left-[calc(50%-80px)] w-[18px] h-[18px] rounded-full shadow-[0_0_12px_rgba(255,106,0,0.2),0_0_30px_rgba(255,106,0,0.1)]"
-                style={{ background: "radial-gradient(circle at 30% 30%, #ff9d4d 0%, #ff6a00 60%, #ff3d00 100%)" }} />
-              <span className="absolute -top-2 right-[calc(50%-80px)] w-[18px] h-[18px] rounded-full shadow-[0_0_12px_rgba(255,106,0,0.2),0_0_30px_rgba(255,106,0,0.1)]"
-                style={{ background: "radial-gradient(circle at 30% 30%, #ff9d4d 0%, #ff6a00 60%, #ff3d00 100%)" }} />
+              <span
+                className="absolute -top-2 left-[calc(50%-80px)] w-[18px] h-[18px] rounded-full shadow-[0_0_12px_rgba(255,106,0,0.2),0_0_30px_rgba(255,106,0,0.1)]"
+                style={{
+                  background:
+                    "radial-gradient(circle at 30% 30%, #ff9d4d 0%, #ff6a00 60%, #ff3d00 100%)",
+                }}
+              />
+              <span
+                className="absolute -top-2 right-[calc(50%-80px)] w-[18px] h-[18px] rounded-full shadow-[0_0_12px_rgba(255,106,0,0.2),0_0_30px_rgba(255,106,0,0.1)]"
+                style={{
+                  background:
+                    "radial-gradient(circle at 30% 30%, #ff9d4d 0%, #ff6a00 60%, #ff3d00 100%)",
+                }}
+              />
 
               <div className="mx-auto">
                 <Image
                   src="/plafff.png"
-                  alt="a"
+                  alt="Playful Rewards"
                   width={150}
                   height={150}
                   className="rounded-md mx-auto drop-shadow-[0_4px_12px_rgba(255,106,0,0.3)]"
@@ -325,11 +448,20 @@ export default function Home() {
                 "Complete at least 3-5 Deals",
                 "Claim Reward & Repeat",
               ].map((txt, i) => (
-                <div key={i} className="flex items-center justify-center gap-3 py-2 font-semibold text-[#2f3033]">
+                <div
+                  key={i}
+                  className="flex items-center justify-center gap-3 py-2 font-semibold text-[#2f3033]"
+                >
                   <span className="w-6 h-6 rounded-full bg-[#ff6a00] text-white text-sm font-bold shadow-[0_2px_8px_rgba(255,106,0,0.35)] flex items-center justify-center">
                     {i + 1}
                   </span>
-                  <span className={i === 2 ? "underline decoration-[#ff6a00] decoration-2 underline-offset-2" : ""}>
+                  <span
+                    className={
+                      i === 2
+                        ? "underline decoration-[#ff6a00] decoration-2 underline-offset-2"
+                        : ""
+                    }
+                  >
                     {txt}
                   </span>
                 </div>
@@ -361,21 +493,43 @@ export default function Home() {
 
       {/* keyframes */}
       <style jsx global>{`
-        @keyframes cardFloat { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
-        .animate-cardFloat { animation: cardFloat 3s ease-in-out infinite; }
-        @keyframes amountPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        .animate-amountPulse { animation: amountPulse 2s infinite; }
-        /* flyDown no longer used, kept here for completeness
-        @keyframes flyDown {
-          0% { transform: translateY(-60px) translateX(0) rotate(0deg); opacity: 0; }
-          10% { opacity: 0.8; }
-          50% { transform: translateY(50vh) translateX(20px) rotate(10deg); }
-          100% { transform: translateY(110vh) translateX(-20px) rotate(-8deg); opacity: 0; }
+        @keyframes cardFloat {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
         }
-        .animate-flyDown { animation-name: flyDown; animation-timing-function: linear; animation-iteration-count: infinite; }
-        */
-        @keyframes slideDown { from { transform: translate(-50%,-100%); opacity: 0; } to { transform: translate(-50%,0); opacity: 1; } }
-        .animate-slideDown { animation: slideDown 0.3s ease-out; }
+        .animate-cardFloat {
+          animation: cardFloat 3s ease-in-out infinite;
+        }
+        @keyframes amountPulse {
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+        .animate-amountPulse {
+          animation: amountPulse 2s infinite;
+        }
+        @keyframes slideDown {
+          from {
+            transform: translate(-50%, -100%);
+            opacity: 0;
+          }
+          to {
+            transform: translate(-50%, 0);
+            opacity: 1;
+          }
+        }
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out;
+        }
       `}</style>
     </>
   );
