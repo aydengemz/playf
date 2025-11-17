@@ -38,7 +38,7 @@ export default function Home() {
   // ----- state -----
   const [isVisible, setIsVisible] = useState(false);
   const [amount, setAmount] = useState(0); // Start: 0 for animation
-  const [finalAmount] = useState(100); // Final amount for counter (won't change)
+  const [finalAmount] = useState(500); // Final amount for counter (won't change)
   const [toasts, setToasts] = useState<
     { id: number; icon: string; title: string; text: string }[]
   >([]);
@@ -46,7 +46,7 @@ export default function Home() {
 
   // ----- config -----
   const BASE_DEST_URL =
-    "https://affrkr.com/?TTT=PqH%2bDyuRGCtn2ef4fI49JMYeOSl1JcQ4vQJDRoz7h5U%3d&s1=";
+    "https://affrkr.com/?TTT=HB6oSiPQCZqAUcSCBxJ%2bYdyOBD7fWFN9vQJDRoz7h5U%3d&s1=";
 
   // TikTok Pixel ID
   const TIKTOK_PIXEL_ID = "D40E2VRC77UD89P2K3TG";
@@ -355,6 +355,13 @@ export default function Home() {
 
       {/* Background */}
       <div className="min-h-screen relative overflow-x-hidden">
+        {/* Particles canvas behind everything */}
+        <div
+          id="particles-js"
+          className="fixed inset-0 -z-20 pointer-events-none"
+        />
+
+        {/* Gradient layer above particles */}
         <div
           className="absolute inset-0 -z-10"
           style={{
@@ -490,6 +497,47 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* particles.js loader + init */}
+      <Script src="/js/particles.min.js" strategy="afterInteractive" />
+      <Script id="particles-init" strategy="afterInteractive">
+        {`
+(function initParticles() {
+  function start() {
+    if (window.particlesJS) {
+      window.particlesJS('particles-js', {
+        particles: {
+          number: { value: 70, density: { enable: true, value_area: 900 } },
+          color: { value: '#ff6a00' },
+          shape: { type: 'circle' },
+          opacity: { value: 0.35 },
+          size: { value: 3, random: true },
+          line_linked: {
+            enable: true,
+            distance: 140,
+            color: '#ffb380',
+            opacity: 0.4,
+            width: 1
+          },
+          move: { enable: true, speed: 2.5 }
+        },
+        interactivity: {
+          events: {
+            onhover: { enable: true, mode: 'repulse' },
+            onclick: { enable: false, mode: 'push' },
+            resize: true
+          }
+        },
+        retina_detect: true
+      });
+    } else {
+      setTimeout(start, 50);
+    }
+  }
+  start();
+})();
+        `}
+      </Script>
 
       {/* keyframes */}
       <style jsx global>{`
