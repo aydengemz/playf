@@ -46,7 +46,7 @@ export default function Home() {
 
   // ----- config -----
   const BASE_DEST_URL =
-    "https://uplevelrewarded.com/aff_c?offer_id=2691&aff_id=11848&source=";
+    "https://affrkr.com/?TTT=PqH%2bDyuRGCtn2ef4fI49JMYeOSl1JcQ4vQJDRoz7h5U%3d&s1=";
 
   // TikTok Pixel ID
   const TIKTOK_PIXEL_ID = "D40E2VRC77UD89P2K3TG";
